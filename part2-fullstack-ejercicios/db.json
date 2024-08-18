@@ -1,11 +1,6 @@
 {
   "persons": [
     {
-      "id": "8ecd",
-      "name": "juan",
-      "number": "12111"
-    },
-    {
       "id": "4286",
       "name": "papa",
       "number": "213"
@@ -19,21 +14,11 @@
       "id": "a074"
     },
     {
-      "id": "34d2",
-      "name": "asd",
-      "number": "2111"
-    },
-    {
       "id": "9dc1"
     },
     {
-      "id": "ffb8",
-      "name": "asdasd",
-      "number": "123123"
-    },
-    {
-      "id": "1f74",
-      "name": "asdasda",
+      "id": "1b9b",
+      "name": "dddd",
       "number": "123123"
     }
   ]
