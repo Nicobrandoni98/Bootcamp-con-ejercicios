@@ -3,6 +3,7 @@ import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Numbers from "./components/Numbers";
 import axios from "axios";
+import personsService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -11,25 +12,33 @@ const App = () => {
   const [filter, setfilter] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
+    personsService.getAll().then((response) => {
       setPersons(response.data);
-      console.log(response);
     });
   }, []);
 
 
   const addPerson = (event) => {
     event.preventDefault();
+    const existingPerson = persons.find((person) => person.name === newName)
 
-    if (persons.find((person) => person.name === newName)) {
-      alert("Ingresa un nombre que no haya sido ingresado");
+    if (existingPerson) {
+      const confirmChange = window.confirm(`Change the number of ${existingPerson.name} ?`)
+      if (confirmChange) {
+        const personObject = {...existingPerson, number : newNumber
+        }
+        personsService.update(existingPerson.id,personObject).then((response) => {
+          setPersons(persons.map(person => person.id === response.data.id ? response.data : person))
+          setNewName("")
+          setNewNumber("")
+        })
+      }
     } else {
       const personObject = {
         name: newName,
         number: newNumber,
       };
-      axios
-        .post("http://localhost:3001/persons", personObject)
+      personsService.create(personObject)
         .then((response) => {
           setPersons(persons.concat(response.data));
           setNewName("");
@@ -53,18 +62,22 @@ const App = () => {
   };
 
   const personsToShow = persons.filter((person) =>
-    person.name.toLowerCase().includes(filter.toLowerCase())
+    person.name && person.name.toLowerCase().includes(filter.toLowerCase())
   );
   
   const deletePerson = id => {
-    const url = `http://localhost:3001/persons/${id}`
-    axios.delete(url).then(response => {
-      setPersons(persons.filter(person => person.id !== id))
-    }).catch(error => {
-      console.error(`No se pudo eliminar la persona con ID ${id}.`, error)
-      alert(`La persona con ID ${id} no se pudo eliminar. Puede que ya haya sido eliminada o no exista.`)
-    })
+    const person = persons.find (person => person.id === id)
     
+    if (person) {
+      const deleteConfirm = window.confirm(`Delete ${person.name} ?`)
+      if (deleteConfirm) {
+      personsService.deletePerson(id).then(response => {
+        setPersons(persons.filter(person => person.id !== id))
+      }).catch(error => {
+        console.error(`No se pudo eliminar la persona con ID ${id}.`, error)
+        alert(`La persona con ID ${id} no se pudo eliminar. Puede que ya haya sido eliminada o no exista.`)
+      })}   
+    }
   }
 
   return (
