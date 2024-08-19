@@ -7,7 +7,7 @@ import personsService from "./services/persons";
 import Notification from "./components/Notification";
 
 const App = () => {
-  const [persons, setPersons] = useState([]);
+  const [persons, setPersons] = useState(null);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setfilter] = useState("");
@@ -35,10 +35,7 @@ const App = () => {
             setPersons(
               persons.map((person) =>
                 person.id === response.data.id ? response.data : person
-              )/* .catch(error => {
-                console.log(error);
-              }) ACA TAMPOCO ESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS*/
-              
+              )
             )
               
             setNewName("");
@@ -49,7 +46,14 @@ const App = () => {
             setTimeout(() => {
               setErrorMessage(null);
             }, 5000);
-          })     
+          }).catch(error => {
+            setErrorMessage(
+              `Information of '${personObject.name}' has already been removed`
+            );
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 5000);
+          })
       }
     } else {
       const personObject = {
