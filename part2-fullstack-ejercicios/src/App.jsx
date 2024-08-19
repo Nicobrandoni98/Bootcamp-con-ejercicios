@@ -6,8 +6,13 @@ import axios from "axios";
 import personsService from "./services/persons";
 import Notification from "./components/Notification";
 
+import countriesService from "./services/countries.js";
+import FilterCountries from "./components/FilterCountries";
+import CountrieShow from "./components/CountrieShow";
+import CountryDetails from "./components/CountryDetails";
+
 const App = () => {
-  const [persons, setPersons] = useState(null);
+  /*  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setfilter] = useState("");
@@ -131,6 +136,50 @@ const App = () => {
       />
       <h2>Numbers</h2>
       <Numbers personsToShow={personsToShow} deletePerson={deletePerson} />
+    </div>
+  ); 
+
+
+  COMENTADO PARA HACER LOS ULTIMOS EJER DE LA PART2 */
+
+  const [countries, setCountries] = useState([]);
+  const [filter, setfilter] = useState("");
+
+  const handleFilterChange = (event) => {
+    setfilter(event.target.value);
+    console.log(event.target.value);
+  };
+
+  const countriesToShow = filter
+    ? countries.filter((country) =>
+        country.name.common.toLowerCase().includes(filter.toLowerCase())
+      )
+    : [];
+
+  useEffect(() => {
+    axios
+      .get("https://studies.cs.helsinki.fi/restcountries/api/all")
+      .then((response) => {
+        setCountries(response.data);
+      });
+  }, []);
+
+  return (
+    <div>
+      <FilterCountries
+        filter={filter}
+        handleFilterChange={handleFilterChange}
+      />
+      <h2>Countries: </h2>
+      {countriesToShow.length > 10 && (
+        <p>Too many matches, please specify another filter</p>
+      )}
+      {countriesToShow.length === 1 && (
+        <CountryDetails country={countriesToShow[0]} />
+      )}
+      {countriesToShow.length > 1 && countriesToShow.length <= 10 && (
+        <CountrieShow countriesToShow={countriesToShow} />
+      )}
     </div>
   );
 };
