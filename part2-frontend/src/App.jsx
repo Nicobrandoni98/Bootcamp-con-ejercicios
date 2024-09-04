@@ -87,7 +87,7 @@ const App = () => {
     setfilter(event.target.value);
   };
 
-  const personsToShow = persons.filter(
+  const personsToShow = (persons || []).filter(
     (person) =>
       person.name && person.name.toLowerCase().includes(filter.toLowerCase())
   );
