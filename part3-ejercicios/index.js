@@ -1,135 +1,83 @@
-const express = require("express");
-const morgan = require("morgan");
+const http = require("http");
 const cors = require("cors");
+const express = require("express");
+const { prependOnceListener } = require("process");
 const app = express();
-app.use(express.static('build'))
-app.use(cors())
 
+var morgan = require("morgan");
+
+// middleware
+app.use(cors());
 app.use(express.json());
-morgan.token('body', (req) => {
-  if (req.method === 'POST') {
-    return JSON.stringify(req.body);
-  }
-  return '-'; // Para otros métodos HTTP, retorna un valor por defecto
-});
-
-// Función personalizada para morgan en formato personalizado
-app.use(morgan((tokens, req, res) => {
-  const contentLength = tokens.res(req, res, 'content-length');
-  const responseTime = tokens['response-time'](req, res);
-  return [
-    tokens.method(req, res),
-    tokens.url(req, res),
-    tokens.status(req, res),
-    contentLength,
-    '-',
-    responseTime + ' ms',
-    tokens.body(req)
-  ].join(' ');
-}));
-
-
+app.use(express.urlencoded());
+app.use(morgan("tiny"));
+morgan(":method :url :status :res[content-length] - :response-time ms");
 let persons = [
   {
     id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
+    name: "John",
+    number: "111 111 111",
   },
   {
     id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
+    name: "Tony",
+    number: "222 222 222",
   },
   {
     id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
+    name: "Joseph",
+    number: "333 333 333",
   },
 ];
-app.get("/info", (request, response) => {
-  response.send(
-    `<p>Phonebook has info for ${
-      persons.length
-    } people</p><p>${new Date().toString()}</p> `
-  );
+app.get("/", (request, response) => {
+  response.send("<h1>Hello World!</h1>");
 });
-
+app.get("/index", (request, response) => {
+  const num_of_persons = persons.length;
+  const request_date = new Date();
+  response.send(`
+    <p>Phonebook has info for ${num_of_persons} people</p>
+    <p>${request_date}</p>`);
+});
 app.get("/api/persons", (request, response) => {
   response.json(persons);
 });
-
 app.get("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
-  const note = persons.find((note) => note.id === id);
-
-  if (note) {
-    response.json(note);
+  const person = persons.find((person) => person.id === id);
+  if (person) {
+    response.json(person);
   } else {
-    response.status(404).end();
+    response.status(400).end();
   }
 });
-
 app.delete("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   persons = persons.filter((person) => person.id !== id);
-
   response.status(204).end();
 });
-
-const generateId = () => {
-  const maxId = persons.length > 0 ? Math.max(...persons.map((n) => n.id)) : 0;
-  return maxId + 1;
-};
-
 app.post("/api/persons", (request, response) => {
-  const body = request.body;
-
-  if (!body.name || !body.number) {
+  console.log(request.body);
+  const maxId = persons.length > 0 ? Math.max(...persons.map((p) => p.id)) : 0;
+  if (!request.body.name || !request.body.number) {
     return response.status(400).json({
-      error: "name or number missing",
+      error: "Name or number are missing.",
     });
-  } else if (persons.map(person => person.name).includes(body.name)) {
-    return response.status(400).json({
-        error: "name must be unique"
-      })
   }
-
+  if (persons.find((person) => person.name === request.body.name)) {
+    return response.status(400).json({
+      error: "Person with the same name already exists. Name must be unique.",
+    });
+  }
   const person = {
-    id: generateId(),
-    name: body.name,
-    number: body.number,
+    id: maxId + 1,
+    name: request.body.name,
+    number: request.body.number,
   };
-
   persons = persons.concat(person);
-
   response.json(person);
 });
 
-app.put("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const body = request.body;
-
-  const personIndex = persons.findIndex(person => person.id === id);
-
-  if (personIndex === -1) {
-    return response.status(404).json({ error: "Person not found" });
-  }
-
-  const updatedPerson = {
-    ...persons[personIndex],
-    name: body.name,
-    number: body.number,
-  };
-
-  persons[personIndex] = updatedPerson;
-
-  response.json(updatedPerson);
-});
 
 
 const PORT = process.env.PORT || 3001
