@@ -15,16 +15,20 @@ const App = () => {
   useEffect(() => {
     personsService.getAll()
       .then(response => {
-        if (response.data) {
+        console.log('Response data:', response.data);
+        if (Array.isArray(response.data)) {
           setPersons(response.data);
         } else {
-          console.error("Unexpected response format:", response);
+          console.error('Unexpected data format:', response.data);
+          setPersons([]);
         }
       })
       .catch(error => {
-        console.error("Failed to fetch persons:", error);
+        console.error('Failed to fetch persons:', error);
+        setPersons([]);
       });
   }, []);
+  
 
   const addPerson = (event) => {
     event.preventDefault();
