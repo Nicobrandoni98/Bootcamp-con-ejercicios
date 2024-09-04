@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Numbers from "./components/Numbers";
-import axios from "axios";
 import personsService from "./services/persons";
 import Notification from "./components/Notification";
 
@@ -10,68 +9,62 @@ const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
-  const [filter, setfilter] = useState("");
+  const [filter, setFilter] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    personsService.getAll().then((response) => {
-      setPersons(response.data);
-    });
+    personsService.getAll()
+      .then(response => {
+        if (response.data) {
+          setPersons(response.data);
+        } else {
+          console.error("Unexpected response format:", response);
+        }
+      })
+      .catch(error => {
+        console.error("Failed to fetch persons:", error);
+      });
   }, []);
 
   const addPerson = (event) => {
     event.preventDefault();
-    const existingPerson = persons.find((person) => person.name === newName);
+    const existingPerson = persons.find(person => person.name === newName);
 
     if (existingPerson) {
-      const confirmChange = window.confirm(
-        `Change the number of ${existingPerson.name} ?`
-      );
+      const confirmChange = window.confirm(`Change the number of ${existingPerson.name}?`);
       if (confirmChange) {
         const personObject = { ...existingPerson, number: newNumber };
-        personsService
-          .update(existingPerson.id, personObject)
-          .then((response) => {
-            setPersons(
-              persons.map((person) =>
-                person.id === response.data.id ? response.data : person
-              )
-            )
-              
+        personsService.update(existingPerson.id, personObject)
+          .then(response => {
+            setPersons(persons.map(person =>
+              person.id === response.data.id ? response.data : person
+            ));
             setNewName("");
             setNewNumber("");
-            setErrorMessage(
-              `The person's number '${personObject.name}' was modified from the server`
-            );
-            setTimeout(() => {
-              setErrorMessage(null);
-            }, 5000);
-          }).catch(error => {
-            setErrorMessage(
-              `Information of '${personObject.name}' has already been removed`
-            );
+            setErrorMessage(`The person's number '${personObject.name}' was modified from the server`);
             setTimeout(() => {
               setErrorMessage(null);
             }, 5000);
           })
+          .catch(error => {
+            setErrorMessage(`Information of '${personObject.name}' has already been removed`);
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 5000);
+          });
       }
     } else {
-      const personObject = {
-        name: newName,
-        number: newNumber,
-      };
-      personsService.create(personObject).then((response) => {
-        setPersons(persons.concat(response.data));
-        setNewName("");
-        setNewNumber("");
-
-        setErrorMessage(
-          `The person '${personObject.name}' was added to the server`
-        );
-        setTimeout(() => {
-          setErrorMessage(null);
-        }, 5000);
-      });
+      const personObject = { name: newName, number: newNumber };
+      personsService.create(personObject)
+        .then(response => {
+          setPersons(persons.concat(response.data));
+          setNewName("");
+          setNewNumber("");
+          setErrorMessage(`The person '${personObject.name}' was added to the server`);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
+        });
     }
   };
 
@@ -84,33 +77,26 @@ const App = () => {
   };
 
   const handleFilterChange = (event) => {
-    setfilter(event.target.value);
+    setFilter(event.target.value);
   };
 
   const personsToShow = (persons || []).filter(
-    (person) =>
-      person.name && person.name.toLowerCase().includes(filter.toLowerCase())
+    person =>
+      person.name && person.name.toLowerCase().includes((filter || "").toLowerCase())
   );
 
   const deletePerson = (id) => {
-    const person = persons.find((person) => person.id === id);
-
+    const person = persons.find(person => person.id === id);
     if (person) {
-      const deleteConfirm = window.confirm(`Delete ${person.name} ?`);
+      const deleteConfirm = window.confirm(`Delete ${person.name}?`);
       if (deleteConfirm) {
-        personsService
-          .deletePerson(id)
-          .then((response) => {
-            setPersons(persons.filter((person) => person.id !== id));
+        personsService.deletePerson(id)
+          .then(() => {
+            setPersons(persons.filter(person => person.id !== id));
           })
-          .catch((error) => {
-            console.error(
-              `No se pudo eliminar la persona con ID ${id}.`,
-              error
-            );
-            alert(
-              `La persona con ID ${id} no se pudo eliminar. Puede que ya haya sido eliminada o no exista.`
-            );
+          .catch(error => {
+            console.error(`No se pudo eliminar la persona con ID ${id}.`, error);
+            alert(`La persona con ID ${id} no se pudo eliminar. Puede que ya haya sido eliminada o no exista.`);
           });
       }
     }
