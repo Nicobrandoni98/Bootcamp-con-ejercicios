@@ -28,14 +28,6 @@ app.use(morgan((tokens, req, res) => {
   ].join(' ');
 }));
 
-/* app.use((req, res, next) => {
-  if (req.body && req.body.name) {
-    console.log(`Note name: ${req.body.name}`);
-  } else {
-    console.log("no name provided in request");
-  }
-  next();
-}) */
 
 let persons = [
   {
