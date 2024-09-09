@@ -5,13 +5,7 @@ console.log('Connecting to', mongoUrl);
 
 mongoose.connect(mongoUrl);
 
-mongoose.connect(mongoUrl)
-  .then(result => {
-    console.log('connected to MongoDB')
-  })
-  .catch(error => {
-    console.log('error connecting to MongoDB:', error.message)
-  })
+
 
 
 const blogSchema = new mongoose.Schema({
