@@ -1,4 +1,5 @@
 const Numbers = ({ personsToShow, deletePerson }) => {
+  console.log('Persons to show in Numbers:', personsToShow);
   return (
     <ul>
       {personsToShow.map((person) => (

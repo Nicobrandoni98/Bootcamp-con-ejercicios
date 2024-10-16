@@ -1,9 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFzZGFzZCIsImlkIjoiNjcxMDAwY2QxMTlmYTZjOWVlOWY3NjM5IiwiaWF0IjoxNzI5MTAyNjI5LCJleHAiOjE3MjkxMDYyMjl9.rRd6WuT95hotGUoPCakh8QB-YSp88LECaXwjqlYx4Q4
 
 {
-  "title": "GODETO",
-  "author": "Arthur J. P.",
-  "url": "https://example.com",
-  "likes": 1241
+  "title": "nuevo libro",
+  "author": "asdasd",
+  "likes": 5,
+  "url": "www.example.com"
 }
